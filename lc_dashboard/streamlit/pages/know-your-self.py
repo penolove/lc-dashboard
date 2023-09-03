@@ -36,9 +36,19 @@ stat = df.groupby(["country", "competition"]).agg(
     n_candidates=("ts", "count"),
 )
 
+# user id setting
+params = st.experimental_get_query_params()
+
+user_ids = list(set(df["name"]))
+if params.get("name"):
+    user_id_query_idx = user_ids.index(params.get("name")[0])
+else:
+    user_id_query_idx = 0
+
 user_id = st.sidebar.selectbox(
     "pick your id compare with others",
-    list(set(df["name"])),
+    user_ids,
+    user_id_query_idx,
     help="leetcode id that wanna analysis",
 )
 
@@ -60,6 +70,7 @@ if user_id:
         ["name", "rank", "competition", "percentile"]
     ]
 
+    # calculate most close competitors
     if is_calculate_competitors:
         user_median = person_score["percentile"].median()
         candidates = df.groupby("name").agg(
