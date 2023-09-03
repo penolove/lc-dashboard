@@ -64,7 +64,6 @@ if is_calculate_competitors:
         "minimum number of competition attended?", min_value=1, max_value=10, value=3
     )
 
-
 if user_id:
     person_score = df[df["name"] == user_id][
         ["name", "rank", "competition", "percentile"]
@@ -116,6 +115,10 @@ if user_id:
         y=["rank"] + selected_lines,
         markers=True,
     )
+
+    for selected_line in selected_lines:
+        fig.update_traces(selector={"name": selected_line}, line={"dash": "dash"})
+
     st.plotly_chart(fig, use_container_width=True, theme="streamlit")
 
     # show metrics you compare to others
