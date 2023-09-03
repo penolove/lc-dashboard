@@ -5,8 +5,8 @@ services:
     environment:
       - LC_ALL=C.UTF-8
       - LANG=C.UTF-8
-      - USER_PASSWD=1234
       - PYTHONPATH=/lc_dashboard
+      - GS_SHEET_ID=1wADT0jfyHTXAcu5WK3Sa3KGKWaoCwcFZ_sCQqR2XZrY
     volumes:
       - .:/lc_dashboard
     ports:

@@ -1,12 +1,17 @@
+import os
+
+import pandas as pd
 import streamlit as st
 from st_aggrid import AgGrid, DataReturnMode
-import pandas as pd
 
 st.set_page_config(layout="wide")
 
+GS_SHEET_ID = os.environ.get("GS_SHEET_ID")
+
 df = pd.read_csv(
-    "https://docs.google.com/spreadsheets/d/1wADT0jfyHTXAcu5WK3Sa3KGKWaoCwcFZ_sCQqR2XZrY/export?format=csv"
+    f"https://docs.google.com/spreadsheets/d/{GS_SHEET_ID}/export?format=csv"
 )
+
 df["ts"] = pd.to_datetime(df["ts"], unit="s")
 
 st.write("filter df:")
