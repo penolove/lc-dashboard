@@ -18,14 +18,26 @@ df = pd.read_csv(
 
 df["ts"] = pd.to_datetime(df["ts"], unit="s")
 
-st.write("filter df:")
-df = AgGrid(
-    df,
-    data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-    fit_columns_on_grid_load=True,
-    height=300,
-    width="100%",
-)["data"]
+if_filter = st.sidebar.toggle(
+    "filter df?",
+    help="if this toggled, then the stat will only calculated on filtered records",
+)
+
+if if_filter:
+    df = AgGrid(
+        df,
+        data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+        fit_columns_on_grid_load=True,
+        height=300,
+        width="100%",
+    )["data"]
+else:
+    AgGrid(
+        df,
+        fit_columns_on_grid_load=True,
+        height=300,
+        width="100%",
+    )
 
 stat = df.groupby(["country", "competition"]).agg(
     ts=("ts", "min"),
