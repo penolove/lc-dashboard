@@ -6,7 +6,7 @@ from st_aggrid import AgGrid, DataReturnMode
 
 st.set_page_config(layout="wide")
 
-GS_SHEET_ID = os.environ.get("GS_SHEET_ID")
+GS_SHEET_ID = os.environ.get("GS_SHEET_ID", "1wADT0jfyHTXAcu5WK3Sa3KGKWaoCwcFZ_sCQqR2XZrY")
 
 df = pd.read_csv(
     f"https://docs.google.com/spreadsheets/d/{GS_SHEET_ID}/export?format=csv"
