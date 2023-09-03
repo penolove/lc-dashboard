@@ -1,3 +1,5 @@
 FROM python:3.10-slim
 
-RUN pip3 install streamlit streamlit-aggrid
+ADD ./requirements.txt .
+
+RUN pip3 install -r requirements.txt
