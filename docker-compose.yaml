@@ -1,0 +1,15 @@
+version: '2.3'
+services:
+  pytorch:
+    build: .
+    environment:
+      - LC_ALL=C.UTF-8
+      - LANG=C.UTF-8
+      - USER_PASSWD=1234
+      - PYTHONPATH=/lc_dashboard
+    volumes:
+      - .:/lc_dashboard
+    ports:
+      - 5566:5566
+    working_dir: /lc_dashboard
+    command: streamlit run lc_dashboard/streamlit/home.py --server.port 5566
