@@ -104,7 +104,7 @@ df = AgGrid(
 )["data"]
 
 st.write("adding rank with filtered users:")
-df["rank"] = df["currentRating"].rank()
+df["rank"] = df["currentGlobalRanking"].rank()
 
 
 st.dataframe(
