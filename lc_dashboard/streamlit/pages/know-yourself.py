@@ -170,7 +170,7 @@ if user_id:
         attended_competitions = set(person_score["competition"])
         person_score["question_id"] = person_score["passed_questions"].str.split(",")
         person_score = person_score.explode("question_id")
-        person_score['is_pass'] = True
+        person_score["is_pass"] = True
 
         question_tag = pd.read_csv(
             f"https://docs.google.com/spreadsheets/d/{GS_SHEET_ID}/export?format=csv&gid={QUESTION_TAG_GID}",
@@ -181,16 +181,28 @@ if user_id:
             & question_tag["competition"].isin(attended_competitions)
         ]
 
-        submissions = question_tag.merge(person_score, on=['competition', 'question_id'], how='left')
-        submissions['is_pass'].fillna(False, inplace=True)
-        st.dataframe(submissions[['title', 'is_pass', 'level', 'tag1', 'tag2', 'competition', 'title-slug']])
+        submissions = question_tag.merge(
+            person_score, on=["competition", "question_id"], how="left"
+        )
+        submissions["is_pass"].fillna(False, inplace=True)
+        submissions["link"] = (
+            "https://leetcode.com/problems/" + submissions["title-slug"]
+        )
+        st.dataframe(
+            submissions[
+                ["title", "is_pass", "level", "tag1", "tag2", "competition", "link"]
+            ],
+            column_config={"link": st.column_config.LinkColumn("link-of-problem")},
+        )
 
         st.write("level analysis")
-        st.dataframe(submissions.groupby('level').agg({"is_pass":"mean"}))
+        st.dataframe(submissions.groupby("level").agg({"is_pass": "mean"}))
 
         st.write("tags analysis")
-        tmp_df2 = submissions[['tag2', 'is_pass']]
-        tmp_df2.columns = ['tags', 'is_pass']
-        tmp_df1 = submissions[['tag1', 'is_pass']]
-        tmp_df1.columns = ['tags', 'is_pass']
-        st.dataframe(pd.concat([tmp_df1, tmp_df2]).groupby('tags').agg({"is_pass": "mean"}))
+        tmp_df2 = submissions[["tag2", "is_pass"]]
+        tmp_df2.columns = ["tags", "is_pass"]
+        tmp_df1 = submissions[["tag1", "is_pass"]]
+        tmp_df1.columns = ["tags", "is_pass"]
+        st.dataframe(
+            pd.concat([tmp_df1, tmp_df2]).groupby("tags").agg({"is_pass": "mean"})
+        )
