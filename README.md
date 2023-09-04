@@ -11,11 +11,21 @@ docker compose up
 
 example sheet: https://docs.google.com/spreadsheets/d/1wADT0jfyHTXAcu5WK3Sa3KGKWaoCwcFZ_sCQqR2XZrY/edit#gid=0
 
-```
-name	rank	percentile	score	ts	country	competition
+score sheet with 
+```csv
+name	rank	percentile	score	ts	country	competition passed_questions(split via ,)
+nekosyndrome	80	0.003477353734	19	1686453148	TW	weekly-contest-349	2810,2828,2836,2839
 ```
 
-the script used to dump data is in lc_dashboard/scripts/dump_logs.py
+second sheet with question tag (set env gid withQUESTION_TAG_GID)
+```csv
+question_id	credit	title	title-slug	competition	tag1	tag2	level
+2839	7	maximum sum queries	maximum-sum-queries	weekly-contest-349	Heap		Hard
+```
+
+
+the script used to dump data is in lc_dashboard/scripts/prepare_*.py
+
 
 
 ## service deployed with streamlit
