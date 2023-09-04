@@ -12,6 +12,9 @@ GS_SHEET_ID = os.environ.get(
     "GS_SHEET_ID", "1wADT0jfyHTXAcu5WK3Sa3KGKWaoCwcFZ_sCQqR2XZrY"
 )
 
+QUESTION_TAG_GID = os.environ.get("QUESTION_TAG_GID", "1858914435")
+
+
 df = pd.read_csv(
     f"https://docs.google.com/spreadsheets/d/{GS_SHEET_ID}/export?format=csv"
 )
@@ -75,6 +78,12 @@ if is_calculate_competitors:
     min_competitions = st.sidebar.number_input(
         "minimum number of competition attended?", min_value=1, max_value=10, value=3
     )
+
+
+is_analysis_questions = st.sidebar.toggle(
+    "If analysis your pass rate with question tags",
+    help="will using tagged question tag to calculate your pass rate",
+)
 
 if user_id:
     person_score = df[df["name"] == user_id][
@@ -153,3 +162,35 @@ if user_id:
         col2.metric(f"compare with 25%:", round(score_25), f"{score_25-user_rank}")
         col3.metric(f"compare with 50%:", round(score_50), f"{score_50-user_rank}")
         col4.metric(f"compare with 75%:", round(score_75), f"{score_75-user_rank}")
+
+    # analysis your question tag
+    if is_analysis_questions:
+        st.header("question tag analysis")
+        person_score = df[df["name"] == user_id][["competition", "passed_questions"]]
+        attended_competitions = set(person_score["competition"])
+        person_score["question_id"] = person_score["passed_questions"].str.split(",")
+        person_score = person_score.explode("question_id")
+        person_score['is_pass'] = True
+
+        question_tag = pd.read_csv(
+            f"https://docs.google.com/spreadsheets/d/{GS_SHEET_ID}/export?format=csv&gid={QUESTION_TAG_GID}",
+            dtype={"question_id": "str"},
+        )
+        question_tag = question_tag[
+            (~question_tag.level.isna())
+            & question_tag["competition"].isin(attended_competitions)
+        ]
+
+        submissions = question_tag.merge(person_score, on=['competition', 'question_id'], how='left')
+        submissions['is_pass'].fillna(False, inplace=True)
+        st.dataframe(submissions[['title', 'is_pass', 'level', 'tag1', 'tag2', 'competition', 'title-slug']])
+
+        st.write("level analysis")
+        st.dataframe(submissions.groupby('level').agg({"is_pass":"mean"}))
+
+        st.write("tags analysis")
+        tmp_df2 = submissions[['tag2', 'is_pass']]
+        tmp_df2.columns = ['tags', 'is_pass']
+        tmp_df1 = submissions[['tag1', 'is_pass']]
+        tmp_df1.columns = ['tags', 'is_pass']
+        st.dataframe(pd.concat([tmp_df1, tmp_df2]).groupby('tags').agg({"is_pass": "mean"}))

@@ -7,6 +7,7 @@ services:
       - LANG=C.UTF-8
       - PYTHONPATH=/lc_dashboard
       - GS_SHEET_ID=1wADT0jfyHTXAcu5WK3Sa3KGKWaoCwcFZ_sCQqR2XZrY
+      - QUESTION_TAG_GID=1858914435
     volumes:
       - .:/lc_dashboard
     ports:
