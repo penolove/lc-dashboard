@@ -194,13 +194,15 @@ if user_id:
         )
 
         st.write("level analysis")
-        st.dataframe(submissions.groupby("level").agg({"is_pass": ["mean", "count", "sum"]}))
+        level_df = submissions.groupby("level").agg({"is_pass": ["mean", "count", "sum"]})
+        level_df.columns = ['pass-ratio', '# of questions', '# passed']
+        st.dataframe(level_df)
 
         st.write("tags analysis")
         tmp_df2 = submissions[["tag2", "is_pass"]]
         tmp_df2.columns = ["tags", "is_pass"]
         tmp_df1 = submissions[["tag1", "is_pass"]]
         tmp_df1.columns = ["tags", "is_pass"]
-        st.dataframe(
-            pd.concat([tmp_df1, tmp_df2]).groupby("tags").agg({"is_pass": ["mean", "count", "sum"] })
-        )
+        tag_df = pd.concat([tmp_df1, tmp_df2]).groupby("tags").agg({"is_pass": ["mean", "count", "sum"] })
+        tag_df.columns = ['pass-ratio', '# of questions', '# passed']
+        st.dataframe(tag_df)
