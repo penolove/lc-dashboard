@@ -185,9 +185,7 @@ if user_id:
             person_score, on=["competition", "question_id"], how="left"
         )
         submissions["is_pass"].fillna(False, inplace=True)
-        submissions["link"] = (
-            "https://leetcode.com/problems/" + submissions["title-slug"]
-        )
+
         st.dataframe(
             submissions[
                 ["title", "is_pass", "level", "tag1", "tag2", "competition", "link"]
