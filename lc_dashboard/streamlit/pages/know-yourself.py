@@ -196,7 +196,7 @@ if user_id:
         )
 
         st.write("level analysis")
-        st.dataframe(submissions.groupby("level").agg({"is_pass": "mean"}))
+        st.dataframe(submissions.groupby("level").agg({"is_pass": ["mean", "count", "sum"]}))
 
         st.write("tags analysis")
         tmp_df2 = submissions[["tag2", "is_pass"]]
@@ -204,5 +204,5 @@ if user_id:
         tmp_df1 = submissions[["tag1", "is_pass"]]
         tmp_df1.columns = ["tags", "is_pass"]
         st.dataframe(
-            pd.concat([tmp_df1, tmp_df2]).groupby("tags").agg({"is_pass": "mean"})
+            pd.concat([tmp_df1, tmp_df2]).groupby("tags").agg({"is_pass": ["mean", "count", "sum"] })
         )
