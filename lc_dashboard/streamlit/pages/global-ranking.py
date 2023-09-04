@@ -102,9 +102,11 @@ df = AgGrid(
 st.write("adding rank with filtered users:")
 df['rank'] = df['currentRating'].rank()
 
-AgGrid(
-    df[['user_name', 'currentRating', 'currentGlobalRanking', 'rank']],
-    fit_columns_on_grid_load=True,
-    height=500,
-    width="100%",
+
+st.dataframe(df,
+        column_config={
+        "ranking": st.column_config.LineChartColumn(
+            "ranking trending plot (competition rank, lower better)",
+        ),
+    },
 )
