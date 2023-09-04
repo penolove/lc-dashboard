@@ -14,6 +14,7 @@ def get_user_info(user):
         "countryCode": user["profile"]["countryCode"],
     }
 
+
 @st.cache_data(ttl=86400)
 def get_global_user_info(page_index):
     """
@@ -78,14 +79,17 @@ def get_global_user_info(page_index):
     time.sleep(0.025)
     return result
 
+
 n_pages_to_fetch = st.sidebar.number_input(
     "number of pages?", min_value=100, max_value=1000, value=100
 )
 
 bar = st.progress(0, text="Operation in progress. Please wait.")
 df_list = []
-for page_index in range(1, n_pages_to_fetch+1):
-    bar.progress(page_index / n_pages_to_fetch, text="Operation in progress. Please wait.")
+for page_index in range(1, n_pages_to_fetch + 1):
+    bar.progress(
+        page_index / n_pages_to_fetch, text="Operation in progress. Please wait."
+    )
     df_list.append(get_global_user_info(page_index))
 
 df = pd.concat(df_list)
@@ -96,15 +100,16 @@ df = AgGrid(
     fit_columns_on_grid_load=True,
     height=500,
     width="100%",
-    editable=True
+    editable=True,
 )["data"]
 
 st.write("adding rank with filtered users:")
-df['rank'] = df['currentRating'].rank()
+df["rank"] = df["currentRating"].rank()
 
 
-st.dataframe(df,
-        column_config={
+st.dataframe(
+    df,
+    column_config={
         "ranking": st.column_config.LineChartColumn(
             "ranking trending plot (competition rank, lower better)",
         ),
