@@ -80,15 +80,64 @@ def get_global_user_info(page_index):
     return result
 
 
+@st.cache_data(ttl=86400 * 3)
+def get_user_latest_rating(user_id):
+    """
+    parameters
+    ----------
+    user_id: str
+        the user id to fetch records
+
+    returns
+    -------
+    user_rating: tuple
+        user_id, rating, ranking
+    """
+
+    session = requests.Session()
+    user_page = f"https://leetcode.com/{user_id}/"
+
+    session.get(user_page)
+
+    body = """
+    {
+        userContestRanking(username: "user_id_") {
+            rating
+            globalRanking
+        }
+    }
+    """.replace(
+        "user_id_", user_id
+    )
+
+    headers = {"x-csrftoken": session.cookies["csrftoken"], "referer": user_page}
+
+    url = "https://leetcode.com/graphql"
+
+    response = session.post(url=url, json={"query": body}, headers=headers)
+
+    user_info = response.json()["data"]["userContestRanking"]
+    # avoid ddos
+    time.sleep(0.025)
+    return (user_id, user_info["rating"], user_info["globalRanking"])
+
+
 n_pages_to_fetch = st.sidebar.number_input(
     "number of pages?", min_value=100, max_value=1000, value=100
 )
 
-bar = st.progress(0, text="Operation in progress. Please wait.")
+is_precise_mode = st.sidebar.toggle(
+    "precise mode (while filtered user < 1000)",
+    help="leetcode global ranking is not so precise, while you toggle this on and also the filter result < 1000, thus precise mode will be enabled",
+)
+
+
+bar = st.progress(0, text="Fetching global rank in progress. Please wait.")
 df_list = []
 for page_index in range(1, n_pages_to_fetch + 1):
     bar.progress(
-        page_index / n_pages_to_fetch, text="Operation in progress. Please wait."
+        page_index / n_pages_to_fetch,
+        text="Fetching global rank in progress. Please wait.",
     )
     df_list.append(get_global_user_info(page_index))
 
@@ -104,8 +153,26 @@ df = AgGrid(
 )["data"]
 
 st.write("adding rank with filtered users:")
-df["rank"] = df["currentGlobalRanking"].rank()
 
+if is_precise_mode and df.shape[0] <= 1000:
+    bar = st.progress(0, text="Fetching precise rating in progress. Please wait.")
+    logs = []
+    for idx, user_name in enumerate(df["user_name"]):
+        bar.progress(
+            (idx + 1) / len(df["user_name"]),
+            text="Fetching precise rating in progress. Please wait.",
+        )
+        logs.append(get_user_latest_rating(user_name))
+
+    precise_df = pd.DataFrame(
+        logs,
+        columns=["user_name", "currentRating", "currentGlobalRanking"],
+    )
+    df.drop("currentRating", axis=1, inplace=True)
+    df.drop("currentGlobalRanking", axis=1, inplace=True)
+    df = df.merge(precise_df, on="user_name")
+
+df["rank"] = df["currentGlobalRanking"].rank()
 
 st.dataframe(
     df,
