@@ -95,7 +95,8 @@ def get_user_latest_rating(user_id):
     """
 
     session = requests.Session()
-    session.get("https://leetcode.com")
+    # visit a light weight page to get csrftoken
+    session.get("https://leetcode.com/contest/globalranking/")
 
     body = """
     {
@@ -117,7 +118,8 @@ def get_user_latest_rating(user_id):
     user_info = response.json()["data"]["userContestRanking"]
     # avoid ddos
     time.sleep(0.025)
-    return (user_id, user_info["rating"], user_info["globalRanking"])
+    if user_info:
+        return (user_id, user_info["rating"], user_info["globalRanking"])
 
 
 n_pages_to_fetch = st.sidebar.number_input(
@@ -160,7 +162,9 @@ if is_precise_mode and df.shape[0] <= 1000:
             (idx + 1) / len(df["user_name"]),
             text="Fetching precise rating in progress. Please wait.",
         )
-        logs.append(get_user_latest_rating(user_name))
+        log = get_user_latest_rating(user_name)
+        if log:
+            logs.append(log)
 
     precise_df = pd.DataFrame(
         logs,
