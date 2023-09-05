@@ -175,6 +175,7 @@ if is_precise_mode and df.shape[0] <= 1000:
     df = df.merge(precise_df, on="user_name")
 
 df["rank"] = df["currentGlobalRanking"].rank()
+df.sort_values("rank", inplace=True)
 
 st.dataframe(
     df,
