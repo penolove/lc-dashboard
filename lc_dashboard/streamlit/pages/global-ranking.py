@@ -95,9 +95,7 @@ def get_user_latest_rating(user_id):
     """
 
     session = requests.Session()
-    user_page = f"https://leetcode.com/{user_id}/"
-
-    session.get(user_page)
+    session.get("https://leetcode.com")
 
     body = """
     {
@@ -109,7 +107,7 @@ def get_user_latest_rating(user_id):
     """.replace(
         "user_id_", user_id
     )
-
+    user_page = f"https://leetcode.com/{user_id}/"
     headers = {"x-csrftoken": session.cookies["csrftoken"], "referer": user_page}
 
     url = "https://leetcode.com/graphql"
