@@ -51,8 +51,9 @@ if_filter = st.sidebar.toggle(
     "filter df?",
     help="if this toggled, then the stat will only calculated on filtered records",
 )
-st.caption("as filter is toggled, filter will affect the percentile calculation")
-st.caption("try to filter with country=US")
+st.caption(
+    "as filter is toggled, filter will affect the percentile calculation, try to filter with country=US"
+)
 if if_filter:
     df_tmp = AgGrid(
         df,
@@ -61,7 +62,7 @@ if if_filter:
         height=300,
         width="100%",
     )["data"]
-    df = pd.concat([target_user_df, df_tmp["name"] != "user_id"])
+    df = pd.concat([target_user_df, df_tmp["name"] != user_id])
 
 else:
     AgGrid(
