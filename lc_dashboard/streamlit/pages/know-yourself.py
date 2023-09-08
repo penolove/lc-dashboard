@@ -42,7 +42,7 @@ else:
         width="100%",
     )
 
-stat = df.groupby(["country", "competition"]).agg(
+stat = df.groupby(["competition"]).agg(
     ts=("ts", "min"),
     one_percent_rank=("rank", lambda x: x.quantile(0.01)),
     twenty_five_rank=("rank", lambda x: x.quantile(0.25)),
