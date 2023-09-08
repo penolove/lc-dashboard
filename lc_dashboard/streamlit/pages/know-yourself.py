@@ -62,8 +62,10 @@ if if_filter:
         height=300,
         width="100%",
     )["data"]
-    df = pd.concat([target_user_df, df_tmp[df_tmp["name"] != user_id]])
-
+    df_tmp["ts"] = pd.to_datetime(df_tmp["ts"])
+    df = pd.concat(
+        [target_user_df, df_tmp[df_tmp["name"] != user_id]], axis=0
+    ).reset_index(drop=True)
 else:
     AgGrid(
         df,
@@ -140,20 +142,17 @@ if user_id:
         "fifty_rank",
         "seventy_five_rank",
     ] + competitors
-    selected_lines = st.multiselect(
-        "available metrics", available_lines, available_lines
-    )
     merged_result.sort_values("ts", inplace=True)
 
     # draw lines
     fig = px.line(
-        merged_result[["ts", "rank"] + selected_lines],
+        merged_result[["ts", "rank"] + available_lines],
         x="ts",
-        y=["rank"] + selected_lines,
+        y=["rank"] + available_lines,
         markers=True,
     )
 
-    for selected_line in selected_lines:
+    for selected_line in available_lines:
         fig.update_traces(selector={"name": selected_line}, line={"dash": "dash"})
 
     st.plotly_chart(fig, use_container_width=True, theme="streamlit")
