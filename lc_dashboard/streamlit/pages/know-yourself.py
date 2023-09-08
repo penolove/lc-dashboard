@@ -25,21 +25,44 @@ def get_records():
 df = get_records()
 df["ts"] = pd.to_datetime(df["ts"], unit="s")
 
+# user id setting
+params = st.experimental_get_query_params()
+
+user_ids = list(set(df["name"]))
+if params.get("name"):
+    user_id_query_idx = user_ids.index(params.get("name")[0])
+else:
+    user_id_query_idx = 0
+
+user_id = st.sidebar.selectbox(
+    "pick your id compare with others",
+    user_ids,
+    user_id_query_idx,
+    help="leetcode id that wanna analysis",
+)
+
+st.write(f"Analyze user_id: {user_id} with competition records")
+
+target_user_df = df[df["name"] == user_id]
+st.dataframe(target_user_df)
+
+
 if_filter = st.sidebar.toggle(
     "filter df?",
     help="if this toggled, then the stat will only calculated on filtered records",
 )
-
-st.write("as filter is toggled, filter will affect the percentile calculation")
-st.write("try to filter with country=US")
+st.caption("as filter is toggled, filter will affect the percentile calculation")
+st.caption("try to filter with country=US")
 if if_filter:
-    df = AgGrid(
+    df_tmp = AgGrid(
         df,
         data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
         fit_columns_on_grid_load=True,
         height=300,
         width="100%",
     )["data"]
+    df = pd.concat([target_user_df, df_tmp["name"] != "user_id"])
+
 else:
     AgGrid(
         df,
@@ -57,22 +80,6 @@ stat = df.groupby(["competition"]).agg(
     n_candidates=("ts", "count"),
 )
 
-# user id setting
-params = st.experimental_get_query_params()
-
-user_ids = list(set(df["name"]))
-if params.get("name"):
-    user_id_query_idx = user_ids.index(params.get("name")[0])
-else:
-    user_id_query_idx = 0
-
-user_id = st.sidebar.selectbox(
-    "pick your id compare with others",
-    user_ids,
-    user_id_query_idx,
-    help="leetcode id that wanna analysis",
-)
-
 is_calculate_competitors = st.sidebar.toggle(
     "If suggest competitors?",
     help="will pick k candidates who's percentile most close to you",
@@ -84,7 +91,6 @@ if is_calculate_competitors:
     min_competitions = st.sidebar.number_input(
         "minimum number of competition attended?", min_value=1, max_value=10, value=3
     )
-
 
 is_analysis_questions = st.sidebar.toggle(
     "If analysis your pass rate with question tags",
