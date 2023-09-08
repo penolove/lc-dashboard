@@ -23,7 +23,7 @@ def get_records():
 df = get_records()
 df["ts"] = pd.to_datetime(df["ts"], unit="s")
 
-if_filter = st.sidebar.toggle(
+if_filter = st.sidebar.get_records()toggle(
     "filter df?",
     help="if this toggled, then the stat will only calculated on filtered records",
 )
@@ -102,7 +102,7 @@ if user_id:
         )
         candidates = candidates[
             (candidates["competition"] >= min_competitions)
-            & (candidates["name"] != user_id)
+            & (candidates.index != user_id)
         ]
         candidates["diff"] = (candidates["percentile"] - user_median).abs()
         suggest_competitors = set(
