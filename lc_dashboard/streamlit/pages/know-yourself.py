@@ -14,11 +14,13 @@ GS_SHEET_ID = os.environ.get(
 
 QUESTION_TAG_GID = os.environ.get("QUESTION_TAG_GID", "1858914435")
 
+@st.cache_data(ttl=86400)
+def get_records():
+    return pd.read_csv(
+        f"https://docs.google.com/spreadsheets/d/{GS_SHEET_ID}/export?format=csv"
+    )
 
-df = pd.read_csv(
-    f"https://docs.google.com/spreadsheets/d/{GS_SHEET_ID}/export?format=csv"
-)
-
+df = get_records()
 df["ts"] = pd.to_datetime(df["ts"], unit="s")
 
 if_filter = st.sidebar.toggle(
@@ -26,6 +28,8 @@ if_filter = st.sidebar.toggle(
     help="if this toggled, then the stat will only calculated on filtered records",
 )
 
+st.write("as filter is toggled, filter will affect the percentile calculation")
+st.write("try to filter with country=US")
 if if_filter:
     df = AgGrid(
         df,
@@ -96,10 +100,13 @@ if user_id:
         candidates = df.groupby("name").agg(
             {"percentile": "median", "competition": "count"}
         )
-        candidates = candidates[candidates["competition"] >= min_competitions]
+        candidates = candidates[
+            (candidates["competition"] >= min_competitions)
+            & (candidates["name"] != user_id)
+        ]
         candidates["diff"] = (candidates["percentile"] - user_median).abs()
         suggest_competitors = set(
-            candidates.nsmallest(n_competitors + 1, "diff").index
+            candidates.nsmallest(n_competitors, "diff").index
         ) - set([user_id])
 
     else:
@@ -194,8 +201,10 @@ if user_id:
         )
 
         st.write("level analysis")
-        level_df = submissions.groupby("level").agg({"is_pass": ["mean", "count", "sum"]})
-        level_df.columns = ['pass-ratio', '# of questions', '# passed']
+        level_df = submissions.groupby("level").agg(
+            {"is_pass": ["mean", "count", "sum"]}
+        )
+        level_df.columns = ["pass-ratio", "# of questions", "# passed"]
         st.dataframe(level_df)
 
         st.write("tags analysis")
@@ -203,6 +212,10 @@ if user_id:
         tmp_df2.columns = ["tags", "is_pass"]
         tmp_df1 = submissions[["tag1", "is_pass"]]
         tmp_df1.columns = ["tags", "is_pass"]
-        tag_df = pd.concat([tmp_df1, tmp_df2]).groupby("tags").agg({"is_pass": ["mean", "count", "sum"] })
-        tag_df.columns = ['pass-ratio', '# of questions', '# passed']
+        tag_df = (
+            pd.concat([tmp_df1, tmp_df2])
+            .groupby("tags")
+            .agg({"is_pass": ["mean", "count", "sum"]})
+        )
+        tag_df.columns = ["pass-ratio", "# of questions", "# passed"]
         st.dataframe(tag_df)
