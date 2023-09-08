@@ -14,16 +14,18 @@ GS_SHEET_ID = os.environ.get(
 
 QUESTION_TAG_GID = os.environ.get("QUESTION_TAG_GID", "1858914435")
 
+
 @st.cache_data(ttl=86400)
 def get_records():
     return pd.read_csv(
         f"https://docs.google.com/spreadsheets/d/{GS_SHEET_ID}/export?format=csv"
     )
 
+
 df = get_records()
 df["ts"] = pd.to_datetime(df["ts"], unit="s")
 
-if_filter = st.sidebar.get_records()toggle(
+if_filter = st.sidebar.toggle(
     "filter df?",
     help="if this toggled, then the stat will only calculated on filtered records",
 )
