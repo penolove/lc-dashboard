@@ -62,7 +62,7 @@ if if_filter:
         height=300,
         width="100%",
     )["data"]
-    df = pd.concat([target_user_df, df_tmp["name"] != user_id])
+    df = pd.concat([target_user_df, df_tmp[df_tmp["name"] != user_id]])
 
 else:
     AgGrid(
