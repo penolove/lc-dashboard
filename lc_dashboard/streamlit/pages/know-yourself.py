@@ -47,32 +47,21 @@ target_user_df = df[df["name"] == user_id]
 st.dataframe(target_user_df)
 
 
-if_filter = st.sidebar.toggle(
-    "filter df?",
-    help="if this toggled, then the stat will only calculated on filtered records",
-)
 st.caption(
-    "as filter is toggled, filter will affect the percentile calculation, try to filter with country=US"
+    "filter will affect the percentile calculation, try to filter with country=US"
 )
-if if_filter:
-    df_tmp = AgGrid(
-        df,
-        data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-        fit_columns_on_grid_load=True,
-        height=300,
-        width="100%",
-    )["data"]
-    df_tmp["ts"] = pd.to_datetime(df_tmp["ts"])
-    df = pd.concat(
-        [target_user_df, df_tmp[df_tmp["name"] != user_id]], axis=0
-    ).reset_index(drop=True)
-else:
-    AgGrid(
-        df,
-        fit_columns_on_grid_load=True,
-        height=300,
-        width="100%",
-    )
+
+df_tmp = AgGrid(
+    df,
+    data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+    fit_columns_on_grid_load=True,
+    height=300,
+    width="100%",
+)["data"]
+df_tmp["ts"] = pd.to_datetime(df_tmp["ts"])
+df = pd.concat([target_user_df, df_tmp[df_tmp["name"] != user_id]], axis=0).reset_index(
+    drop=True
+)
 
 stat = df.groupby(["competition"]).agg(
     ts=("ts", "min"),
