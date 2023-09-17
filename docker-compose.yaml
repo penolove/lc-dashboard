@@ -12,5 +12,7 @@ services:
       - .:/lc_dashboard
     ports:
       - 5566:5566
+      # - 8888:8888
     working_dir: /lc_dashboard
     command: streamlit run lc_dashboard/streamlit/home.py --server.port 5566
+    # command: jupyter lab --ip=0.0.0.0 --allow-root --NotebookApp.token=''
